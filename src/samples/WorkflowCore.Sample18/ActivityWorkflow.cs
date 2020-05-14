@@ -7,6 +7,8 @@ using WorkflowCore.Sample18.Steps;
 
 namespace WorkflowCore.Sample18
 {
+    // 活动工作流
+
     class ActivityWorkflow : IWorkflow<MyData>
     {
         public string Id => "activity-sample";

@@ -7,6 +7,8 @@ using WorkflowCore.Sample17.Steps;
 
 namespace WorkflowCore.Sample17
 {
+    // 工作流执行失败补偿示例
+
     class CompensatingWorkflow : IWorkflow
     {
         public string Id => "compensate-sample";

@@ -6,6 +6,8 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Sample14
 {
+    // 循环执行的工作流
+    
     class RecurSampleWorkflow : IWorkflow<MyData>
     {
         public string Id => "recur-sample";
