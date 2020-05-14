@@ -28,6 +28,7 @@ namespace WorkflowCoreWebSample
 
             services.AddTransient<StartupStep>();
             services.AddTransient<ApprovalResultStep>();
+            services.AddTransient<Approval2ResultStep>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

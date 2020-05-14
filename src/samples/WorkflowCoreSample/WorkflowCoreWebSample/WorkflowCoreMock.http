@@ -1,39 +1,75 @@
 ### WorkflowCore 示例
 
-### 触发工作流外部事件
+### 触发工作流外部事件，示例1
 POST http://localhost:5000/api/workflow/fire HTTP/1.1
 Content-Type: application/json
 
 {
-    "approvalResult": 8,
-    "eventName": "ApprovalEventName08"
+    "approvalResult": 2,
+    "userName": "jroger",
+    "eventName": "ApprovalEventName02"
+}
+
+### 触发工作流外部事件，示例2-1
+POST http://localhost:5000/api/workflow/fire2 HTTP/1.1
+Content-Type: application/json
+
+{
+    "approvalResult": 2,
+    "userName": "jroger",
+    "eventName": "ApprovalEventName01"
+}
+
+### 触发工作流外部事件，示例2-2
+POST http://localhost:5000/api/workflow/fire2 HTTP/1.1
+Content-Type: application/json
+
+{
+    "approvalResult": 1,
+    "userName": "ying",
+    "eventName": "ApprovalEventName02"
 }
 
 ### 自定义工作流创建
-@id=ApprovalExternalEventWorkflow08
-@eventName="\\\"ApprovalEventName08\\\""
-@eventKey="\\\"ApprovalEventKey\\\""
+@id=ApprovalExternalEventWorkflow02
+@eventName1="\\\"ApprovalEventName01\\\""
+@eventName2="\\\"ApprovalEventName02\\\""
+@eventKey="\\\"Approval2EventKey\\\""
 
 POST http://localhost:5000/api/workflow/definition HTTP/1.1
 Content-Type: application/json
 
 Id: "{{id}}"
 Version: 1
-DataType: "WorkflowCoreWebSample.Workflow.ExternalEvent.ApprovalEventData, WorkflowCoreWebSample"
+DataType: "WorkflowCoreWebSample.Workflow.ExternalEvent.Approval2EventData, WorkflowCoreWebSample"
 Steps:
 - Id: "StartupStep"
   StepType: "WorkflowCoreWebSample.Workflow.StartupStep, WorkflowCoreWebSample"
-  NextStepId: "WaitApproval"
-- Id: "WaitApproval"
+  NextStepId: "WaitApproval1"
+- Id: "WaitApproval1"
   StepType: "WorkflowCore.Primitives.WaitFor, WorkflowCore"
-  NextStepId: "ApprovalResult"
+  NextStepId: "ApprovalResult1"
   Inputs:
-    EventName: {{eventName}}
+    EventName: {{eventName1}}
     EventKey: {{eventKey}}
     EffectiveDate: "DateTime.Now"
   Outputs:
-    ApprovalResult: "EventData"
-- Id: "ApprovalResult"
-  StepType: "WorkflowCoreWebSample.Workflow.ExternalEvent.ApprovalResultStep, WorkflowCoreWebSample"
+    JsonData: "EventData"
+- Id: "ApprovalResult1"
+  StepType: "WorkflowCoreWebSample.Workflow.ExternalEvent.Approval2ResultStep, WorkflowCoreWebSample"
+  NextStepId: "WaitApproval2"
   Inputs:
-    ApprovalResult: "data.ApprovalResult"
+    JsonData: "data.JsonData"
+- Id: "WaitApproval2"
+  StepType: "WorkflowCore.Primitives.WaitFor, WorkflowCore"
+  NextStepId: "ApprovalResult2"
+  Inputs:
+    EventName: {{eventName2}}
+    EventKey: {{eventKey}}
+    EffectiveDate: "DateTime.Now"
+  Outputs:
+    JsonData: "EventData"
+- Id: "ApprovalResult2"
+  StepType: "WorkflowCoreWebSample.Workflow.ExternalEvent.Approval2ResultStep, WorkflowCoreWebSample"
+  Inputs:
+    JsonData: "data.JsonData"

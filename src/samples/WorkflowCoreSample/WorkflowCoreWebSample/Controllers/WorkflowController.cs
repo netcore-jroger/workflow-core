@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using WorkflowCore.Interface;
 using WorkflowCore.Services.DefinitionStorage;
 using WorkflowCoreWebSample.Dto;
@@ -53,6 +54,16 @@ namespace WorkflowCoreWebSample.Controllers
             var eventData = new ApprovalEventData { UserName = dto.UserName, ApprovalResult = dto.ApprovalResult };
 
             await this._host.PublishEvent(dto.EventName, ConstValues.ApprovalEventKey, eventData);
+
+            return Json(new { message = "approval event published." });
+        }
+
+        [HttpPost("fire2")]
+        public async Task<IActionResult> Fire2([FromBody] ApprovalDto dto)
+        {
+            var eventData = new ApprovalEventData { UserName = dto.UserName, ApprovalResult = dto.ApprovalResult };
+
+            await this._host.PublishEvent(dto.EventName, ConstValues.Approval2EventKey, JsonConvert.SerializeObject(eventData));
 
             return Json(new { message = "approval event published." });
         }
