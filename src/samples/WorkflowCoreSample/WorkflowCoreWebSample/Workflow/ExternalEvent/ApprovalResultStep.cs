@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
@@ -13,11 +14,11 @@ namespace WorkflowCoreWebSample.Workflow.ExternalEvent
             this._logger = logger;
         }
 
-        public int ApprovalResult { get; set; }
+        public ApprovalEventData EventData { get; set; }
 
         public override ExecutionResult Run(IStepExecutionContext context)
         {
-            this._logger.LogWarning($"------ ApprovalResult: {this.ApprovalResult} ------");
+            this._logger.LogWarning($"------ ApprovalResult: {(this.EventData == null ? "empty_event_data" : JsonConvert.SerializeObject(this.EventData))} ------");
 
             return ExecutionResult.Next();
         }

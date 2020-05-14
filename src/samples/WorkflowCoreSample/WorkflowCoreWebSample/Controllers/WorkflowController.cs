@@ -50,7 +50,9 @@ namespace WorkflowCoreWebSample.Controllers
         [HttpPost("fire")]
         public async Task<IActionResult> Fire([FromBody] ApprovalDto dto)
         {
-            await this._host.PublishEvent(dto.EventName, ConstValues.ApprovalEventKey, dto.ApprovalResult);
+            var eventData = new ApprovalEventData { UserName = dto.UserName, ApprovalResult = dto.ApprovalResult };
+
+            await this._host.PublishEvent(dto.EventName, ConstValues.ApprovalEventKey, eventData);
 
             return Json(new { message = "approval event published." });
         }
