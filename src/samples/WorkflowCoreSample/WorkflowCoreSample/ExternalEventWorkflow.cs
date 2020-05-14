@@ -26,13 +26,13 @@ namespace WorkflowCoreSample
         {
             builder.StartWith(context => ExecutionResult.Next())
 
-                // µÚÒ»¸öµÈ´ıÊÂ¼ş
+                // ç¬¬ä¸€ä¸ªç­‰å¾…äº‹ä»¶
                 .WaitFor(EventName01, (data, context) => data.Request, data => DateTime.Now)
                     .Output(data => data.ApprovedBy, step => step.EventData)
                 .Then<CustomMessage>()
                     .Input(step => step.Message, data => $"The data from the event [{EventName01}] is [{data.ApprovedBy}]")
                 
-                // µÚ¶ş¸öµÈ´ıÊÂ¼ş
+                // ç¬¬äºŒä¸ªç­‰å¾…äº‹ä»¶
                 .WaitFor(EventName02, (data, context) => data.Request, data => DateTime.Now)
                     .Output(data => data.ApprovedBy, step => step.EventData)
                 .Then<CustomMessage>()
