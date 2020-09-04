@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using ConcurrentCollections;
 using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -54,13 +55,18 @@ namespace WorkflowCore.Services.BackgroundTasks
         {
             var cancelToken = _cancellationTokenSource.Token;
             var activeTasks = new Dictionary<string, Task>();
-            var secondPasses = new HashSet<string>();
+            var secondPasses = new ConcurrentHashSet<string>();
 
             while (!cancelToken.IsCancellationRequested)
             {
                 try
                 {
-                    if (activeTasks.Count >= MaxConcurrentItems)
+                    var activeCount = 0;
+                    lock (activeTasks)
+                    {
+                        activeCount = activeTasks.Count;
+                    }
+                    if (activeCount >= MaxConcurrentItems)
                     {
                         await Task.Delay(Options.IdleTime);
                         continue;
@@ -74,16 +80,21 @@ namespace WorkflowCore.Services.BackgroundTasks
                             await Task.Delay(Options.IdleTime, cancelToken);
                         continue;
                     }
-                    
-                    if (activeTasks.ContainsKey(item))
+
+                    var hasTask = false;
+                    lock (activeTasks)
+                    {
+                        hasTask = activeTasks.ContainsKey(item);
+                    }
+                    if (hasTask)
                     {
                         secondPasses.Add(item);
                         if (!EnableSecondPasses)
                             await QueueProvider.QueueWork(item, Queue);
                         continue;
-                    }
+                    }                   
 
-                    secondPasses.Remove(item);
+                    secondPasses.TryRemove(item);
 
                     var task = new Task(async (object data) =>
                     {
@@ -92,7 +103,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                             await ExecuteItem((string)data);
                             while (EnableSecondPasses && secondPasses.Contains(item))
                             {
-                                secondPasses.Remove(item);
+                                secondPasses.TryRemove(item);
                                 await ExecuteItem((string)data);
                             }
                         }
@@ -120,7 +131,13 @@ namespace WorkflowCore.Services.BackgroundTasks
                 }
             }
 
-            foreach (var task in activeTasks.Values)
+            List<Task> toComplete;
+            lock (activeTasks)
+            {
+                toComplete = activeTasks.Values.ToList();
+            }
+            
+            foreach (var task in toComplete)
                 task.Wait();
         }
 
